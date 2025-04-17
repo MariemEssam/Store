@@ -18,6 +18,13 @@ The program simulates multiple buyers trying to purchase items from a store conc
 - Golang (Go)
 - Concurrency (goroutines, channels, mutex)
 - Structs
+  
+# How to Run
 
+1. Install Go: https://go.dev/dl/
+2. Clone this repo:
+   ```bash
+   git clone https://github.com/MariemEssam/Store.git
+   cd Store-go
 
 

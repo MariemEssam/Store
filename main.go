@@ -6,33 +6,30 @@ import (
 	"time"
 )
 
-// Struct representing a purchase request
-// Includes buyer name, product name, quantity, and a reply channel to get a response
-
+//Struct representing a purchase requests includes my buyers  name, product name, quantity, and a reply channel to get a response
 // PurchaseRequest defines the structure of a customer request
-// Contains the buyer name, product they want, quantity, and a reply channel
 
 type PurchaseRequest struct {
-	BuyerName string      // Buyer's name
-	Product   string      // Product name
-	Quantity  int         // Quantity requested
-	ReplyChan chan string // Channel to receive the store's response
+	BuyerName string
+	Product   string
+	Quantity  int
+	ReplyChan chan string
 }
 
 // Store struct represents the store
 // Holds available products and their quantities
-// Uses a mutex to ensure safe concurrent access
+// Uses a mutex to ensure safe concurrent access "No data races"
 
 type Store struct {
-	Products map[string]int // Map of product name to quantity
-	Mutex    sync.Mutex     // Mutex to prevent data races
+	Products map[string]int
+	Mutex    sync.Mutex
 }
 
 // ProcessPurchase handles a customer's purchase request
 func (s *Store) ProcessPurchase(req PurchaseRequest) {
 	// Lock the store for safe concurrent access
 	s.Mutex.Lock()
-	defer s.Mutex.Unlock() // Ensure we unlock no matter what
+	defer s.Mutex.Unlock()
 
 	availableQty, exists := s.Products[req.Product] // Check if the product exists
 
@@ -42,7 +39,7 @@ func (s *Store) ProcessPurchase(req PurchaseRequest) {
 	}
 
 	if availableQty >= req.Quantity {
-		s.Products[req.Product] -= req.Quantity // Deduct quantity
+		s.Products[req.Product] -= req.Quantity
 		req.ReplyChan <- fmt.Sprintf("%s bought %d of %s. Remaining: %d", req.BuyerName, req.Quantity, req.Product, s.Products[req.Product])
 	} else if availableQty > 0 {
 		req.ReplyChan <- fmt.Sprintf("%s found Not enough stock for %s. Available: %d", req.BuyerName, req.Product, availableQty)
@@ -55,16 +52,16 @@ func (s *Store) ProcessPurchase(req PurchaseRequest) {
 func Buyer(req PurchaseRequest, storeChan chan PurchaseRequest, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	storeChan <- req            // Send request to the store
-	response := <-req.ReplyChan // Wait for response
-	fmt.Println(response)       // Print result
+	storeChan <- req
+	response := <-req.ReplyChan
+	fmt.Println(response)
 }
 
 // StoreWorker continuously handles incoming purchase requests
 func StoreWorker(store *Store, storeChan chan PurchaseRequest) {
 	for req := range storeChan {
 		store.ProcessPurchase(req)
-		time.Sleep(500 * time.Millisecond) // Simulate slight delay to keep it real
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
@@ -105,6 +102,6 @@ func main() {
 		go Buyer(buyer, storeChan, &wg)
 	}
 
-	wg.Wait()        // Wait for all buyers to finish
-	close(storeChan) // Close the channel after use
+	wg.Wait()
+	close(storeChan)
 }

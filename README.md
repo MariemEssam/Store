@@ -12,11 +12,12 @@ The program simulates multiple buyers trying to purchase items from a store conc
 - Store handles requests safely using a mutex.
 - Proper responses based on product availability.
 - Use of goroutines, channels, and wait groups.
-
-# Technologies
+  
+# Concepts Used 
 
 - Golang (Go)
 - Concurrency (goroutines, channels, mutex)
+- Structs
 
 
 

@@ -22,15 +22,16 @@ type PurchaseRequest struct {
 
 type Store struct {
 	Products map[string]int
+	Mutex    sync.Mutex
 }
 
 // ProcessPurchase handles a customer's purchase request
 func (s *Store) ProcessPurchase(req PurchaseRequest) {
-
+	// Lock the store for safe concurrent access
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	availableQty, exists := s.Products[req.Product]
+	availableQty, exists := s.Products[req.Product] // Check if the product exists
 
 	if !exists {
 		req.ReplyChan <- fmt.Sprintf("%s Product %s not available", req.BuyerName, req.Product)
@@ -52,6 +53,8 @@ func Buyer(req PurchaseRequest, storeChan chan PurchaseRequest, wg *sync.WaitGro
 	defer wg.Done()
 
 	storeChan <- req
+	response := <-req.ReplyChan
+	fmt.Println(response)
 }
 
 // StoreWorker continuously handles incoming purchase requests
@@ -64,7 +67,7 @@ func StoreWorker(store *Store, storeChan chan PurchaseRequest) {
 
 func main() {
 
-	// Initialize my store with some products and their quantity
+	// Initialize my store with some products which are fruits and their quantity
 	store := Store{
 		Products: map[string]int{
 			"Apple":  6,
@@ -77,10 +80,10 @@ func main() {
 	// Channel to send purchase requests to my store
 	storeChan := make(chan PurchaseRequest)
 
-	// Use goroutine to start my store worker
+	// Start the store worker as a goroutine
 	go StoreWorker(&store, storeChan)
 
-	// Identification of my buyers and their purchase requests
+	// List of my buyers and their purchase requests
 	buyers := []PurchaseRequest{
 		{"Ali", "Apple", 2, make(chan string)},
 		{"Mariem", "Apple", 4, make(chan string)},
@@ -99,6 +102,6 @@ func main() {
 		go Buyer(buyer, storeChan, &wg)
 	}
 
-	wg.Wait()        // Wait for all buyers to finish
-	close(storeChan) // Close the channel after use
+	wg.Wait()
+	close(storeChan)
 }

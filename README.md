@@ -26,5 +26,6 @@ The program simulates multiple buyers trying to purchase items from a store conc
    ```bash
    git clone https://github.com/MariemEssam/Store.git
    cd Store-go
+   go run main.go
 
 
